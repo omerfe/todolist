@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed:ital,wght@1,100&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        html {
+            font-size: 24px;
+        }
+
+        body {
+            font-family: 'Fira Sans Extra Condensed', sans-serif;
+        }
+
+        .done > span {
+            text-decoration: line-through;
+        }
+
+        .container {
+            background-color: rgba(240, 128, 128, 0.842);
+            border-radius: 20px;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem;
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+        }
+
+        @media (max-width: 920px) {
+            .container {
+                margin: 1rem;
+            }
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul>li {
+            line-height: 2;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .delete {
+            margin-left: auto;
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+
+        ul>li:hover .delete {
+            display: inline;
+        }
+
+        ul>li:nth-child(even) {
+            background-color: rgb(103, 171, 173);
+            border-radius: 20px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: .5rem;
+        }
+
+        input[type="text"] {
+            border: 1px solid #848484;
+            -webkit-border-radius: 30px;
+            -moz-border-radius: 30px;
+            border-radius: 30px;
+            outline: 0;
+            height: 25px;
+            width: 275px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        button {
+            background-color: rgb(91, 153, 155);
+            color: white;
+            padding: 8px 18px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>To-Do's</h1>
+        <form id="frmNew">
+            <input id="txtTask" type="text" autocomplete="off" required placeholder="Type something to do...">
+            <button>Add</button>
+        </form>
+        <ul id="todos"></ul>
+    </div>
+
+    <script>
+        var todos = [];
+        var ulTodos = document.getElementById("todos");
+        var frm = document.getElementById("frmNew");
+        var txt = document.getElementById("txtTask");
+
+        function listTodos() {
+            todos.sort((a, b) => a.isDone - b.isDone);
+            save();
+            ulTodos.innerHTML = "";
+
+            for (const todo of todos) {
+                var li = document.createElement("li");
+                if (todo.isDone) {
+                    li.classList.add("done");
+                }
+                li.todo = todo;
+                var chk = document.createElement("input");
+                chk.onchange = statusChanged;
+                chk.checked = todo.isDone;
+                chk.type = "checkbox";
+                li.appendChild(chk);
+
+                var span = document.createElement("span");
+                span.textContent = todo.task;
+                li.appendChild(span);
+                
+                var btn = document.createElement("i");
+                btn.onclick = deleteClicked;
+                btn.classList.add("fas");
+                btn.classList.add("fa-times");
+                btn.classList.add("delete");
+                li.appendChild(btn);
+                
+                ulTodos.appendChild(li);
+            }
+        }
+
+        function deleteClicked() {
+             var todo = this.parentNode.todo;
+             var index = todos.indexOf(todo);
+             todos.splice(index, 1);
+             listTodos();
+        }
+
+        function statusChanged() {
+            this.parentNode.todo.isDone = this.checked;
+            listTodos();
+        }
+
+        function save() {
+            localStorage["data"] = JSON.stringify(todos);
+        }
+
+        function load() {
+            try {
+                todos = JSON.parse(localStorage["data"]);
+            } catch (error) {
+                todos = [{ task: "Do your homework", isDone: false }, { task: "Watch Netflix", isDone: true }];
+            }
+        }
+
+        frm.onsubmit = function (event) {
+            event.preventDefault();
+            var task = txt.value;
+            todos.unshift({ task: task, isDone: false });
+            listTodos();
+            txt.value = "";
+        };
+
+        load();
+        listTodos();
+    </script>
+</body>
+
+</html>
